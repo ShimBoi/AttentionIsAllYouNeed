@@ -94,31 +94,6 @@ def train(cfg):
 if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # cfg = {
-    #     "device": torch.device("cuda" if torch.cuda.is_available() else "cpu"),
-    #     "train": {
-    #         "epochs": 100,
-    #         "samples": 10000,
-    #         "batch_size": 32,
-    #         "lr": 3e-4,
-    #         "betas": (0.9, 0.98),
-    #         "eps": 1e-9,
-    #         "warmup_steps": 4000,
-    #     },
-    #     "model": TransformerConfig(
-    #         d_model=512,
-    #         d_ff=2048,
-    #         num_heads=8,
-    #         n_encoder_layers=6,
-    #         n_decoder_layers=6,
-    #         vocab_size=58101,  # MarianTokenizer vocab size
-    #         dropout_prob=0.1,
-    #         positional_encoding="sinusoidal",
-    #         device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
-    #     ),
-    # }
-
-    ### TEST CONFIG
     cfg = {
         "device": device,
         "train": {
@@ -128,19 +103,44 @@ if __name__ == "__main__":
             "lr": 3e-4,
             "betas": (0.9, 0.98),
             "eps": 1e-9,
-            "warmup_steps": 100,
+            "warmup_steps": 4000,
         },
         "model": TransformerConfig(
-            d_model=256,
-            d_ff=1024,
-            num_heads=4,
-            n_encoder_layers=3,
-            n_decoder_layers=3,
-            vocab_size=58101,
+            d_model=512,
+            d_ff=2048,
+            num_heads=8,
+            n_encoder_layers=6,
+            n_decoder_layers=6,
+            vocab_size=58101,  # MarianTokenizer vocab size
             dropout_prob=0.1,
             positional_encoding="sinusoidal",
             device=device,
         ),
     }
+
+    ### TEST CONFIG
+    # cfg = {
+    #     "device": device,
+    #     "train": {
+    #         "epochs": 100,
+    #         "samples": 10000,
+    #         "batch_size": 32,
+    #         "lr": 3e-4,
+    #         "betas": (0.9, 0.98),
+    #         "eps": 1e-9,
+    #         "warmup_steps": 100,
+    #     },
+    #     "model": TransformerConfig(
+    #         d_model=256,
+    #         d_ff=1024,
+    #         num_heads=4,
+    #         n_encoder_layers=3,
+    #         n_decoder_layers=3,
+    #         vocab_size=58101,
+    #         dropout_prob=0.1,
+    #         positional_encoding="sinusoidal",
+    #         device=device,
+    #     ),
+    # }
 
     train(cfg)
