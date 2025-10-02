@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 from transformer import Transformer
@@ -7,18 +8,16 @@ from utils import TransformerConfig
 from wmt14_dataset import WMTDataset
 from transformers import MarianTokenizer
 from scheduler import AIAYNScheduler
-
-# dataset = load_dataset("wmt14", "de-en")
-# train_dataset = dataset["train"]
-# val_dataset = dataset["val"]
-# test_dataset = dataset["test"]
-
-# for batch in train_dataset:
-#     de = batch["translation"]["de"]
-#     en = batch["translation"]["en"]
+from datetime import datetime
+from utils import save_checkpoint, plot_loss_curve
+from tqdm import tqdm
 
 
 def train(cfg):
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_dir = f"checkpoints/{timestamp}"
+    os.makedirs(output_dir, exist_ok=True)
+
     device = cfg["device"]
     train_cfg = cfg["train"]
     model_cfg = cfg["model"]
@@ -57,9 +56,10 @@ def train(cfg):
 
     criterion = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_token_id)
 
+    losses = []
     for epoch in range(train_cfg["epochs"]):
         total_loss = 0.0
-        for batch_idx, batch in enumerate(train_loader):
+        for batch_idx, batch in tqdm(enumerate(train_loader), total=len(train_loader)):
             input_ids = batch["src"].to(device)
             tgt = batch["tgt"].to(device)
             padding_mask = batch["src_padding_mask"].to(device)
@@ -71,12 +71,15 @@ def train(cfg):
                 input_padding_mask=padding_mask,
                 self_attn_mask=self_attn_mask[:, :, :-1, :-1],
             )
+
             loss = criterion(
                 logits.reshape(-1, tokenizer.vocab_size), tgt[:, 1:].reshape(-1)
             )
 
             optimizer.zero_grad()
             loss.backward()
+
+            # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
             scheduler.step()
 
@@ -88,7 +91,32 @@ def train(cfg):
                 )
 
         avg_loss = total_loss / len(train_loader)
+        losses.append(avg_loss)
         print(f"Epoch {epoch} finished, Average Loss: {avg_loss:.4f}")
+
+        if (epoch + 1) % train_cfg["ckpt_interval"] == 0:
+            checkpoint_path = os.path.join(
+                output_dir, f"checkpoint_epoch_{epoch+1}_{avg_loss}.pt"
+            )
+            save_checkpoint(
+                model, optimizer, scheduler, epoch, avg_loss, cfg, checkpoint_path
+            )
+
+    # save final
+    final_model_path = os.path.join(output_dir, "final_model.pt")
+    save_checkpoint(
+        model,
+        optimizer,
+        scheduler,
+        train_cfg["epochs"] - 1,
+        losses[-1],
+        cfg,
+        final_model_path,
+    )
+
+    # Plot loss curve at the end
+    loss_curve_path = os.path.join(output_dir, "loss_curve.png")
+    plot_loss_curve(losses, loss_curve_path)
 
 
 if __name__ == "__main__":
@@ -97,13 +125,14 @@ if __name__ == "__main__":
     cfg = {
         "device": device,
         "train": {
-            "epochs": 100,
-            "samples": 10000,
-            "batch_size": 32,
+            "epochs": 100,  # 100_000 / (4_500_000 / 16) = ~0.36
+            "samples": -1,
+            "batch_size": 16,
             "lr": 3e-4,
             "betas": (0.9, 0.98),
             "eps": 1e-9,
             "warmup_steps": 4000,
+            "ckpt_interval": 1,
         },
         "model": TransformerConfig(
             d_model=512,

@@ -28,8 +28,13 @@ class WMTDataset(Dataset):
     def __getitem__(self, idx):
         pair = self.dataset[idx]["translation"]
 
-        src_ids = self.tokenizer.encode(pair[self.src_language])
-        tgt_ids = self.tokenizer.encode(pair[self.tgt_language])
+        src_ids = self.tokenizer.encode(
+            pair[self.src_language], max_length=512, truncation=True
+        )
+        tgt_ids = self.tokenizer.encode(
+            pair[self.tgt_language], max_length=512, truncation=True
+        )
+        tgt_ids = [self.tokenizer.eos_token_id] + tgt_ids
 
         return {
             "src": src_ids,

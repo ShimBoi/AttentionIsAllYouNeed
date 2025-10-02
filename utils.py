@@ -1,5 +1,6 @@
 import torch
 from dataclasses import dataclass
+import matplotlib.pyplot as plt
 
 
 @dataclass
@@ -30,3 +31,30 @@ def create_copy_task_data(n_samples, seq_len, vocab_size):
         data.append((seq, seq))
 
     return data
+
+
+def save_checkpoint(model, optimizer, scheduler, epoch, loss, cfg, filepath):
+    """Save model checkpoint"""
+    checkpoint = {
+        "epoch": epoch,
+        "model_state_dict": model.state_dict(),
+        "loss": loss,
+        "config": cfg,
+    }
+    torch.save(checkpoint, filepath)
+    print(f"Checkpoint saved to {filepath}")
+
+
+def plot_loss_curve(train_losses, save_path):
+    """Plot and save training loss curve"""
+    plt.figure(figsize=(10, 6))
+    plt.plot(train_losses, label="Training Loss", linewidth=2)
+    plt.xlabel("Epoch", fontsize=12)
+    plt.ylabel("Loss", fontsize=12)
+    plt.title("Training Loss Curve", fontsize=14)
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300, bbox_inches="tight")
+    print(f"Loss curve saved to {save_path}")
+    plt.close()
