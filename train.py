@@ -54,11 +54,16 @@ def train(cfg):
         warmup_steps=train_cfg["warmup_steps"],
     )
 
-    criterion = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_token_id)
+    criterion = nn.CrossEntropyLoss(
+        ignore_index=tokenizer.pad_token_id, label_smoothing=0.1
+    )
 
+    accumulation_steps = train_cfg.get("grad_accum_steps", 1)
     losses = []
     for epoch in range(train_cfg["epochs"]):
         total_loss = 0.0
+        optimizer.zero_grad()
+
         for batch_idx, batch in tqdm(enumerate(train_loader), total=len(train_loader)):
             input_ids = batch["src"].to(device)
             tgt = batch["tgt"].to(device)
@@ -76,19 +81,22 @@ def train(cfg):
                 logits.reshape(-1, tokenizer.vocab_size), tgt[:, 1:].reshape(-1)
             )
 
-            optimizer.zero_grad()
+            # Scale loss by accumulation steps
+            loss = loss / accumulation_steps
             loss.backward()
 
-            # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
-            optimizer.step()
-            scheduler.step()
+            if (batch_idx + 1) % accumulation_steps == 0:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                optimizer.step()
+                scheduler.step()
+                optimizer.zero_grad()
 
-            total_loss += loss.item()
-
-            if batch_idx % 10 == 0:
                 print(
-                    f"Epoch {epoch}, Batch {batch_idx}, Loss: {loss.item():.4f}, LR: {scheduler.get_lr():.6f}"
+                    f"Epoch {epoch}, Batch {batch_idx}, Loss: \
+                      {loss.item():.4f}, LR: {scheduler.get_lr():.6f}"
                 )
+
+            total_loss += loss.item() * accumulation_steps  # unscale for logging
 
         avg_loss = total_loss / len(train_loader)
         losses.append(avg_loss)
@@ -125,9 +133,10 @@ if __name__ == "__main__":
     cfg = {
         "device": device,
         "train": {
-            "epochs": 100,  # 100_000 / (4_500_000 / 16) = ~0.36
+            "epochs": 15,  # 100_000 / (4_500_000 / 16) = ~0.36
             "samples": -1,
             "batch_size": 16,
+            "grad_accum_steps": 8,
             "lr": 3e-4,
             "betas": (0.9, 0.98),
             "eps": 1e-9,

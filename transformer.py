@@ -78,7 +78,8 @@ class MultiHeadAttention(nn.Module):
             .view(bs, -1, self.num_heads * self.d_v)
         )  # [bs, seqlen_q, num_heads * d_v]
 
-        return self.W_o(attention)
+        out = self.W_o(attention)  # [bs, seqlen_q, d_model]
+        return out
 
 
 class FFN(nn.Module):
@@ -250,6 +251,7 @@ class Transformer(nn.Module):
                     num_heads=self.num_heads,
                     d_k=self.d_k,
                     d_v=self.d_v,
+                    dropout_prob=self.dropout_prob,
                 )
                 for _ in range(self.n_encoder_layers)
             ]
@@ -262,6 +264,7 @@ class Transformer(nn.Module):
                     num_heads=self.num_heads,
                     d_k=self.d_k,
                     d_v=self.d_v,
+                    dropout_prob=self.dropout_prob,
                 )
                 for _ in range(self.n_decoder_layers)
             ]

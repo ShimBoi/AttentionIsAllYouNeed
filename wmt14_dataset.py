@@ -69,3 +69,21 @@ class WMTDataset(Dataset):
             }
 
         return collate_fn
+
+
+if __name__ == "__main__":
+    from datasets import load_dataset
+
+    dataset = load_dataset("wmt14", "de-en", split="train")
+    tokenizer = MarianTokenizer.from_pretrained("Helsinki-NLP/opus-mt-de-en")
+
+    train_data = WMTDataset(
+        dataset, tokenizer=tokenizer, src_language="de", tgt_language="en"
+    )
+
+    batch = train_data[0]
+    batch = train_data.get_collate_fn()([batch])
+
+    for key, value in batch.items():
+        print(f"{key}: {value.shape}")
+        print(value)

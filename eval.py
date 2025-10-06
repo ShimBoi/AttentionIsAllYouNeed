@@ -79,14 +79,10 @@ def greedy_decode(model, src, tokenizer, max_length, device):
         tgt_tensor = torch.tensor([tgt_tokens]).to(device)
 
         tgt_len = len(tgt_tokens)
-        tgt_mask = tgt_mask = torch.tril(
-            torch.ones(tgt_len, tgt_len)
-        )  # FIX: wrong triangle mask
+        tgt_mask = torch.tril(torch.ones(tgt_len, tgt_len))  # FIX: wrong triangle mask
         tgt_mask = tgt_mask.unsqueeze(0).unsqueeze(0).to(device)
 
         logits = model(src, tgt_tensor, self_attn_mask=tgt_mask)
-        probs = torch.softmax(logits[0, -1, :], dim=-1)
-        top_5 = probs.topk(5)
         next_token = logits[0, -1, :].argmax().item()
 
         # Stop if EOS
@@ -101,7 +97,9 @@ def greedy_decode(model, src, tokenizer, max_length, device):
 
 
 if __name__ == "__main__":
-    checkpoint_path = "checkpoints/20251001_203656/final_model.pt"
+    folder = "checkpoints/20251004_124049"
+    model = "checkpoint_epoch_8_2.8863706763278008.pt"  # checkpoint_epoch_6_2.938388252400438.pt
+    checkpoint_path = f"{folder}/{model}"
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model, checkpoint = load_checkpoint(checkpoint_path, device)
