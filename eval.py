@@ -11,7 +11,10 @@ def load_checkpoint(filepath, device):
     checkpoint = torch.load(filepath, map_location=device, weights_only=False)
 
     # Recreate model with saved config
-    model = Transformer(checkpoint["config"]["model"]).to(device)
+    model_cfg = checkpoint["config"]["model"]
+    model_cfg.dropout_prob = 0.0  # no dropout during eval
+
+    model = Transformer(model_cfg).to(device)
     model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
 
@@ -97,8 +100,10 @@ def greedy_decode(model, src, tokenizer, max_length, device):
 
 
 if __name__ == "__main__":
-    folder = "checkpoints/20251004_124049"
-    model = "checkpoint_epoch_8_2.8863706763278008.pt"  # checkpoint_epoch_6_2.938388252400438.pt
+    # folder = "checkpoints/20251004_124049"
+    # model = "final_model.pt"
+    folder = "checkpoints/20251007_005548"
+    model = "checkpoint_epoch_3_3.2990540319351207.pt"
     checkpoint_path = f"{folder}/{model}"
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

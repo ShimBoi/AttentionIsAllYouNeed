@@ -136,7 +136,7 @@ if __name__ == "__main__":
             "epochs": 15,  # 100_000 / (4_500_000 / 16) = ~0.36
             "samples": -1,
             "batch_size": 16,
-            "grad_accum_steps": 8,
+            "grad_accum_steps": 52,
             "lr": 3e-4,
             "betas": (0.9, 0.98),
             "eps": 1e-9,
