@@ -25,18 +25,18 @@ Loaded checkpoint from epoch 14
 
 Training loss was: 2.7890
 
-BLEU score: 15.34
+BLEU score: **15.34**
 
 Evaluated on -1 samples
 
 
 ### Sample Translations
 
-Source: Gutach: Noch mehr Sicherheit für Fußgänger
+**Source**: Gutach: Noch mehr Sicherheit für Fußgänger
 
-Reference: Gutach: Increased safety for pedestrians
+**Reference**: Gutach: Increased safety for pedestrians
 
-Hypothesis: More safety: pedestrians
+**Hypothesis**: More safety: pedestrians
 ____
 
 **Source**: Sie stehen keine 100 Meter voneinander entfernt: Am Dienstag ist in Gutach die neue B 33-Fußgängerampel am Dorfparkplatz in Betrieb genommen worden - in Sichtweite der älteren Rathaus
