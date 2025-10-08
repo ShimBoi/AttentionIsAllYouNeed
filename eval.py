@@ -100,10 +100,8 @@ def greedy_decode(model, src, tokenizer, max_length, device):
 
 
 if __name__ == "__main__":
-    # folder = "checkpoints/20251004_124049"
-    # model = "final_model.pt"
-    folder = "checkpoints/20251007_005548"
-    model = "checkpoint_epoch_3_3.2990540319351207.pt"
+    folder = "checkpoints/20251004_124049"
+    model = "final_model.pt"
     checkpoint_path = f"{folder}/{model}"
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
