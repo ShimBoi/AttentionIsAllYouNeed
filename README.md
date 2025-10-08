@@ -1,5 +1,5 @@
 # AttentionIsAllYouNeed
-Recreating the original encoder-decoder transformers architecture from the ["Attention Is All You Need"](https://arxiv.org/pdf/1706.03762) paper by Vaswani et al.
+This repository contains a full PyTorch implementation of the original encoder-decoder Transformer architecture from ["Attention Is All You Need"](https://arxiv.org/pdf/1706.03762) paper by Vaswani et al. If you’d like a step-by-step walkthrough of how the Transformer works and how each part fits together, check out my accompanying [Medium article](https://medium.com/@jshim1213/dedication-is-all-we-need-recreating-the-original-transformer-2c29298eae63)!
 
 ## Installation Guide
 1. Set up the environment using conda or install locally:
