@@ -27,7 +27,7 @@ Training loss was: 2.7890
 
 BLEU score: **15.34**
 
-Evaluated on -1 samples
+Evaluated on -1 samples (all)
 
 
 ### Sample Translations
